@@ -1,0 +1,24 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: classic-task-deploy
+  namespace: classic-tekton-ns
+spec:
+  inputs:
+    resources:
+      - name: source-repo
+        type: git
+    params:
+      - name: pathToDeploymentFiles
+        description: Path to deployment yaml files
+        default: /workspace/source-repo/deployment/yaml/
+  steps:
+    - name: deploy
+      image: lachlanevenson/k8s-kubectl
+      command: ["kubectl"]
+      args:
+        - "apply"
+        - "-f"
+        - "$(inputs.params.pathToDeploymentFiles)"
+        - "-R"
+        - "--validate=false"

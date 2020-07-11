@@ -1,0 +1,19 @@
+apiVersion: tekton.dev/v1alpha1
+kind: TriggerBinding
+metadata:
+  annotations:
+    manifestival: new
+  name: classic-pipeline-java-binding
+  namespace: classic-tekton-ns
+spec:
+  params:
+  - name: GIT_URL
+    value: $(body.repository.clone_url)
+  - name: GIT_REVISION
+    value: $(body.pull_request.head.sha)
+  - name: GIT_REPO_NAME
+    value: $(body.repository.name)
+  - name: NAMESPACE
+    value: classic-tekton-ns
+  - name: SERVICE_ACCOUNT
+    value: pipeline

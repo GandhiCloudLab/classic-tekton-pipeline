@@ -1,0 +1,69 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Pipeline
+metadata:
+  name: classic-pipeline-java
+  namespace: classic-tekton-ns
+spec:
+  resources:
+    - name: git-source-repo
+      type: git
+    - name: docker-image-registry
+      type: image
+  params:  
+    - name: pathToDeploymentFiles
+      description: kubectl yaml files
+      default: /workspace/git-repo/deployment/yaml      
+  tasks:
+    - name: run-test
+      taskRef:
+        name: classic-task-test-java
+      resources:
+        inputs:
+          - name: source-repo
+            resource: git-source-repo
+    - name: build
+      taskRef:
+        name: classic-task-build-scan-push-java
+      runAfter:
+       - run-test
+      resources:
+        inputs:
+          - name: source-repo
+            resource: git-source-repo
+        outputs:
+          - name: image-registry
+            resource: docker-image-registry
+    - name: deploy
+      taskRef:
+        name: classic-task-deploy
+      runAfter:
+       - build
+      params:
+        - name: pathToDeploymentFiles
+          value: "$(params.pathToDeploymentFiles)"       
+      resources:
+        inputs:
+          - name: source-repo
+            resource: git-source-repo
+    # - name: health
+    #   taskRef:
+    #     name: igc-health-check
+    #   runAfter:
+    #     - deploy
+    #   resources:
+    #     inputs:
+    #       - name: source
+    #         resource: git-source
+    #       - name: image
+    #         resource: docker-image
+    # - name: gitops
+    #   taskRef:
+    #     name: igc-gitops
+    #   runAfter:
+    #    - health
+    #   resources:
+    #     inputs:
+    #       - name: source
+    #         resource: git-source
+    #       - name: image
+    #         resource: docker-image

@@ -1,0 +1,12 @@
+apiVersion: tekton.dev/v1alpha1
+kind: EventListener
+metadata:
+  name: classic-pipeline-java-el
+  namespace: classic-tekton-ns
+spec:
+  serviceAccountName: classic-trigger-sa
+  triggers:
+   - binding:
+     - name: classic-pipeline-java-binding
+     template:
+       name: classic-pipeline-java-triggertemplate
